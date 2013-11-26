@@ -4,7 +4,7 @@ require 'httparty'
 require 'json'
 
 # load and parse the JSON file of scraped crimes
-results = JSON.parse(File.read("../data/all-crimes-2013.json"))
+results = JSON.parse(File.read("../data/all-crimes.json"))
 
 crimes = []
 
@@ -21,8 +21,8 @@ results.each_with_index do |row, index|
     puts "#{index}: #{address_str}".green
 
     # get JSON location data from the toolbox EC2 instance
-    # change URL to your own instance or VM
-    geo_info = JSON.parse(HTTParty.get("http://ec2-54-201-118-42.us-west-2.compute.amazonaws.com/maps/api/geocode/json?sensor=false&address=#{CGI::escape(address_str)}").response.body)
+    # change instance URL to your own because this one won't work anymore
+    geo_info = JSON.parse(HTTParty.get("http://ec2-56-201-118-42.us-west-2.compute.amazonaws.com/maps/api/geocode/json?sensor=false&address=#{CGI::escape(address_str)}").response.body)
 
     crime[:geo_results] = {}
     crime[:geo_results] = geo_info['results'][0]
@@ -30,6 +30,7 @@ results.each_with_index do |row, index|
     crimes << crime
   rescue => e
     # if something goes wrong, break the loop and print the error
+    # this could also sleep for a bit and retry
     puts "Oops: #{e}".red
     break
   end
@@ -38,6 +39,6 @@ results.each_with_index do |row, index|
 end
 
 # write the results to a file
-File.open("../data/all-geo-2013.json","w") do |f|
+File.open("../data/all-geo.json","w") do |f|
    f.write(crimes.to_json)
 end

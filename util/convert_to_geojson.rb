@@ -2,7 +2,7 @@ require 'json'
 require 'colored'
 
 # read and parse the JSON data
-results = JSON.parse(File.read("../data/all-geo-2013.json"))
+results = JSON.parse(File.read("../data/all-geo.json"))
 
 # initialize the GeoJSON
 geo_json = {
@@ -19,7 +19,7 @@ results.each_with_index do |crime, index|
   # save crime data as GeoJSON
   the_crime = {
     :type => "Feature",
-    :id => crime['id'],
+    :id => crime['incident_number'],
     :geometry => {
       :type => "Point",
       :coordinates => [crime['geo_results']['geometry']['location']['lng'], crime['geo_results']['geometry']['location']['lat']]
@@ -35,10 +35,11 @@ results.each_with_index do |crime, index|
 
   # customize the markers some
   marker_properties = {
-      :'marker-color' => '#e5ec2b',
+      :'marker-color' => '#e5ec2b', # yellow
       :'marker-size' => "small" # select a marker size
     }
 
+  # highlight rapes and homicides
   if crime['general_type_crime'].downcase == "forcible rape" || crime['general_type_crime'].downcase == "homicide offenses"
     marker_properties[:'marker-color'] = '#cb1414'
   end
@@ -50,6 +51,6 @@ results.each_with_index do |crime, index|
 end
 
 # write the GeoJSON data to a file
-File.open("../data/all-crimes-2013.geojson","w") do |f|
+File.open("../data/all-crimes.geojson","w") do |f|
   f.write(geo_json.to_json)
 end
